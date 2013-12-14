@@ -12,17 +12,17 @@ public class Node {
     private char value;
     private int cost;
     private char[][] matrix;
-    private Node son;
+    private Node son, dad;
 
     public Node() {
         cost = 9;
         value = '$';
         matrix = new char[4][4];
         for (int i = 0; i < matrix.length; i++) {
-            matrix[1][i] = '$';
-            matrix[i][1] = '$';
+            matrix[0][i] = '$';
+            matrix[i][0] = '$';
         }
-        son = null;
+        son = null; dad = null;
     }
 
     public Node(char value, int cost, char[][] matrix, Node son) {
