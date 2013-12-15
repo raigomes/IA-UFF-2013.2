@@ -10,27 +10,20 @@ package fillinblanks;
  */
 public class Node {
     private char name;
-    private float cost, function;
+    private double cost, function;
     private char[][] matrix;
-    private Node son, dad;
+    private Node dad;
 
-    public Node() {
-        cost = 9.0f; function = 0.0f;
-        name = '$';
+    public Node(char name) {
+        cost = 9.0d; function = 0.0d;
+        this.name = name;
         matrix = new char[4][4];
         for (int i = 0; i < matrix.length; i++) {
             matrix[0][i] = '$';
             matrix[i][0] = '$';
         }
-        son = null; dad = null;
-    }
-
-    public Node(char name, int cost, char[][] matrix, Node son) {
-        this.name = name;
-        this.cost = cost;
-        this.matrix = matrix;
-        this.son = son;
-    }
+        dad = null;
+    }   
         
 
     public char getName() {
@@ -42,19 +35,19 @@ public class Node {
     }
     
 
-    public float getCost() {
+    public double getCost() {
         return cost;
     }
 
-    public void setCost(float cost) {
+    public void setCost(double cost) {
         this.cost = cost;
     }
 
-    public float getFunction() {
+    public double getFunction() {
         return function;
     }
 
-    public void setFunction(float function) {
+    public void setFunction(double function) {
         this.function = function;
     }
     
@@ -67,14 +60,13 @@ public class Node {
     }
     
 
-    public Node getSon() {
-        return son;
-    }
-
-    public void setSon(Node son) {
-        this.son = son;
-    }
-
+//    public Node getSon() {
+//        return son;
+//    }
+//
+//    public void setSon(Node son) {
+//        this.son = son;
+//    }
     
     
     public char[][] getMatrix() {
