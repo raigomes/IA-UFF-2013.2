@@ -41,29 +41,53 @@ public class Tree {
     
     public void AStar(List<Node> input) {        
         List<Node> frontier = new LinkedList<Node>();
-        Set<String> explored = new HashSet<String>();
+        Set<Character> explored = new HashSet<Character>();
         Map<String, Float> heuristic = getHeuristicFromFile();
         SortedSet<String> dictionary = getDictionaryFromFile();
         
-        frontier = sortedAdd(frontier, input, heuristic);
+        frontier.add(init);
+        //frontier = sortedAdd(frontier, input, heuristic);
         
-        AStar(init, frontier, explored, heuristic, dictionary);
+        AStar(frontier, explored, input, heuristic, dictionary);
                 
     }
     
-    private void AStar(Node node, List<Node> frontier, Set<String> explored, Map<String, Float> heuristic, SortedSet<String> dictionary) {
-        throw new UnsupportedOperationException("Not yet implemented");
+    private void AStar(List<Node> frontier, Set<Character> explored, List<Node> input, Map<String, Float> heuristic, SortedSet<String> dictionary) {        
+    
+        if(frontier.isEmpty()) {
+            System.out.println("FALHA"); //Testa se já foi visto todos os casos
+        }
+        else {
+            Node node = frontier.remove(0); //Pop no nó melhor avaliado do frontier
+            
+            if(node.getCost() == 0) {
+                System.out.println(node); //Se chegou no objetivo, imprime matriz completa.
+            }
+            else {                
+                explored.add(node.getName()); //Senão, adiciona nó no explored
+                input.remove(node); //Remove do input
+                
+                frontier = sortedAdd(explored.size(), frontier, explored, input, heuristic); //adiciona filhos no frontier
+                
+                AStar(frontier, explored, input, heuristic, dictionary); 
+            }
+        }
+        
     }
 
     private void HillClimbing(List<Node> input) {
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
+    
+    
     private void SimmulatedAnnealing(List<Node> input) {
         throw new UnsupportedOperationException("Not yet implemented");
     }   
     
-    private Map<String, Float> getHeuristicFromFile() {
+    
+    
+    private Map<String, Float> getHeuristicFromFile() {//Get all of heuristic values.
         Map<String, Float> heuristic = new HashMap<String, Float>();
         Scanner file = new Scanner(path + heuristicFileName);
         
@@ -87,7 +111,7 @@ public class Tree {
             
     }
 
-    private SortedSet<String> getDictionaryFromFile() {
+    private SortedSet<String> getDictionaryFromFile() {//Get all of 3-gram words.
         SortedSet<String> dic = new TreeSet<String>();
         Scanner file = new Scanner(path + dicFileName);
         
@@ -107,29 +131,55 @@ public class Tree {
         }
     }
 
-    private List<Node> sortedAdd(List<Node> frontier, List<Node> input, Map<String, Float> heuristic) {
+    //
+    private List<Node> sortedAdd(int index, List<Node> frontier, Set<Character> explored, List<Node> input, Map<String, Float> heuristic) {
         
         for(Node n: input) {
-            float function = n.getCost() + heuristic.get("$ "+n.getName()); //Evaluate function
-            n.setFunction(function);
-            int i = 0; boolean inseriu = false;
+            int lin = (int) (index / 3) + 1;
+            int col = index - 1;
+            char[][] matrix = n.getMatrix();
             
-            if (!frontier.isEmpty()) {
-                while(i < frontier.size() && !inseriu) {
-                    Node aux = frontier.get(i);                    
-                    if(aux.getFunction() > function) {
-                        frontier.add(i, n);
+            float function = n.getCost() + heuristic.get(matrix[lin][col] + " " + n.getName()); //Evaluate function
+            n.setFunction(function);        
+            
+            if(!explored.contains(n.getName())) {
+                boolean inseriu = false;
+                
+                for (int i = 0; i < frontier.size(); i++) {
+                    if(frontier.get(i).getName() == n.getName() && frontier.get(i).getFunction() < n.getFunction()) {
+                        frontier.set(i, n); //Modifica nó de mesmo nome, se function do nó novo for maior
+                        inseriu = true;
                     }
-                    else
-                        i++;
                 }
+                
+                if(!inseriu) //Add nó novo
+                    frontier = sortedAdd(n, frontier); 
             }
-            
-            if(!inseriu)
-                frontier.add(n);
+                            
         }
         
         return frontier;
+    }
+
+    private List<Node> sortedAdd(Node n, List<Node> list) {
+        int i = 0; boolean inseriu = false;
+
+        if (!list.isEmpty()) { //Add de maneira que a lista fique em ordem decrescente de function.
+            while(i < list.size() && !inseriu) {
+                Node aux = list.get(i);                    
+                if(aux.getFunction() > n.getFunction()) {
+                    list.add(i, n);
+                    inseriu = true;
+                }
+                else
+                    i++;
+            }
+        }
+
+        if(!inseriu) //lista vazia ou function maior da lista, add no fim.
+            list.add(n);
+        
+        return list;
     }
     
 }

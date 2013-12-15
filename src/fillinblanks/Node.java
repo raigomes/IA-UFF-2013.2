@@ -84,6 +84,20 @@ public class Node {
     public void setMatrix(char[][] matrix) {
         this.matrix = matrix;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder answer = new StringBuilder();
+        for (int i = 1; i < matrix.length; i++) {
+            answer.append("{");
+            for (int j = 1; j < matrix[0].length; j++) {
+                answer.append(matrix[i][j]).append(" ");                
+            }            
+            answer.append("}\n");
+        }
+        
+        return answer.toString();
+    }
     
     
     
