@@ -6,12 +6,10 @@ package fillinblanks;
 
 import java.io.File;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -35,11 +33,11 @@ public class Tree {
     }
     
     public void search(char[] input) {
-        List<Node> in = new LinkedList<Node>();
+        List<Character> in = new LinkedList<Character>();
+        //in.add('$');
         
         for(char name: input) {
-            Node aux = new Node(name);
-            in.add(aux);
+            in.add(name);
         }
         
         AStar(in);
@@ -47,22 +45,30 @@ public class Tree {
         //SimmulatedAnnealing(in);
     }
     
-    public void AStar(List<Node> input) {        
+    public void AStar(List<Character> input) {        
         List<Node> frontier = new LinkedList<Node>();
-        Set<Character> explored = new HashSet<Character>();
+        List<String> explored = new LinkedList<String>();
         Map<String, Double> heuristic = getHeuristicFromFile();
         SortedSet<String> dictionary = getDictionaryFromFile();
         
+        //Print add init no Frontier
+        System.out.println("Log:\n");
         frontier.add(init);
+        System.out.println("   Add "+" "+ init.getName()+" no Frontier\n");
         
-        AStar(frontier, explored, input, heuristic, dictionary);
+        
+        AStar(explored.size(), frontier, explored, input, heuristic, dictionary);
                 
     }
     
-    private void AStar(List<Node> frontier, Set<Character> explored, List<Node> input, Map<String, Double> heuristic, SortedSet<String> dictionary) {        
+    private void AStar(int index, List<Node> frontier, List<String> explored, List<Character> input, Map<String, Double> heuristic, SortedSet<String> dictionary) {        
     
         if(frontier.isEmpty()) {
-            System.out.println("FALHA"); //Testa se já foi visto todos os casos do frontier.
+            System.out.println("FALHA\n"); //Testa se já foi visto todos os casos do frontier.
+            
+            for (int i = 0; i < explored.size(); i++) {
+                System.out.println(explored.get(i));
+            }
         }
         else {
             Node node = frontier.remove(0); //Pop no nó melhor avaliado do frontier
@@ -71,14 +77,33 @@ public class Tree {
                 System.out.println(node); //Se chegou no objetivo, imprime matriz completa.
             }
             else {
-                if(!explored.contains(node.getName())) {
-                    explored.add(node.getName()); //Senão, adiciona nó no explored
-                    input.remove(node); //Remove do input
+                char nameDad;
+                if(node.getDad() == null) 
+                    nameDad = '/';                
+                else
+                    nameDad = node.getDad().getName();
+                Character name = node.getName();
+
+                if(!explored.contains(nameDad+"->"+name)) {
+                    //Print Add no Explored e Remove do Input
+                    System.out.println(index+"- Add "+nameDad+" -> "+node.getName()+" no Explored\n   Remove "+node.getName()+" do Input\n");
+
+                    explored.add(nameDad+"->"+name); //Senão, adiciona nó no explored
+                    input.remove(name); //Remove do input
+                    index++;
+                    System.out.println(index);
                 }
                 
-                frontier = sortedAdd(explored.size(), node, frontier, explored, input, heuristic, dictionary); //adiciona filhos no frontier
+                boolean isChanged = sortedAdd(index, node, frontier, explored, input, heuristic, dictionary); //adiciona filhos no frontier
                 
-                AStar(frontier, explored, input, heuristic, dictionary); 
+                if(!isChanged) {
+                    input.add(name);                    
+                    index--;
+                    System.out.println(index);
+                }
+                
+                AStar(index, frontier, explored, input, heuristic, dictionary); 
+                
             }
         }
         
@@ -155,51 +180,59 @@ public class Tree {
         }
     }
 
-    //
-    private List<Node> sortedAdd(int index, Node dad, List<Node> frontier, Set<Character> explored, List<Node> input, Map<String, Double> heuristic, SortedSet<String> dictionary) {
+    //Add values that was sorted by evaluated function on frontier.
+    private boolean sortedAdd(int index, Node dad, List<Node> frontier, List<String> explored, List<Character> input, Map<String, Double> heuristic, SortedSet<String> dictionary) {
         /* col = index - (lin - 1)*3 = 
          *     = 1 - (1 - 1)*3 = 1 - 0 = 1
          *     = 4 - (2 - 1)*3 = 4 - 3 = 1
          *     = 7 - (3 - 1)*3 = 7 - 6 = 1
          */
-        for(Node n: input) {
+        
+        boolean changed = false;
+        for(char name: input) {
             int lin = (int) (index - 1)/ 3 + 1;
             int col = index - (lin - 1)* 3;
             
-            char[][] matrix = n.getMatrix();
-            matrix[lin][col] = n.getName();
-            
-            System.out.println(index+" "+dad.getName()+" "+n.getName());
-            
-            n.setCost(9.0f - index);
-            double function = n.getCost() + heuristic.get(matrix[lin][col - 1] + " " + n.getName()); //Evaluate function
-            System.out.println(" "+function + '\n');
-            n.setFunction(function);
+            Node n = new Node(name);            
             n.setDad(dad);
+            n.setCost(9.0f - index);
+            //n.setMatrix(n.getDad().getMatrix());
+            
+            char[][] matrix = updateMatrix(index, n, lin, col);            
+                                    
+            double function = n.getCost() + heuristic.get(matrix[lin][col - 1] + " " + n.getName()); //Evaluate function
+            n.setFunction(function);
                         
             //Test if node was explored.
-            if(!explored.contains(n.getName())) { 
+            if(!explored.contains(n.getDad().getName()+"->"+n.getName())) { 
                 //Test if node is valid, i.e. bigram heuristic > 0 or word is contained in dictionary.
-                if(isValid(n, lin, col, heuristic, dictionary)){ 
+                boolean aux = isValid(n, lin, col, heuristic, dictionary);
+                if(aux){ 
                     boolean inseriu = false;
+                    changed = true; 
 
                     for (int i = 0; i < frontier.size(); i++) {
-                        if(frontier.get(i).getName() == n.getName() && frontier.get(i).getFunction() < n.getFunction()) {
+                        //if(frontier.get(i).getName() == n.getName() && frontier.get(i).getFunction() < n.getFunction()) {
+                        if(frontier.get(i).getName() == n.getName()){
                             frontier.set(i, n); //Modify node with same name if function of new node to be higher.
                             inseriu = true;
+                            System.out.println("   Set "+frontier.get(i).getName()+" no Frontier");
                         }
                     }
 
-                    if(!inseriu) {//Add new node
-                        
-                        frontier = sortedAdd(n, frontier); 
+                    if(!inseriu) {//Add new node                        
+                        frontier = sortedAdd(n, frontier);   
+                        //Print add no Frontier
+                        System.out.println("   Add "+n.getDad().getName()+" -> "+n.getName()+" no Frontier");
                     }
+                    //Print function
+                    System.out.println("   F(n) = "+function + '\n');            
                 }
             }
                             
         }
         
-        return frontier;
+        return changed;
     }
 
     private List<Node> sortedAdd(Node n, List<Node> list) {
@@ -208,7 +241,7 @@ public class Tree {
         if (!list.isEmpty()) { //Add de maneira que a lista fique em ordem decrescente de function.
             while(i < list.size() && !inseriu) {
                 Node aux = list.get(i);                    
-                if(aux.getFunction() > n.getFunction()) {
+                if(aux.getFunction() < n.getFunction()) {
                     list.add(i, n);
                     inseriu = true;
                 }
@@ -228,17 +261,17 @@ public class Tree {
         boolean lineValid = false, colValid = false, diagonalValid = false;
         char[][] matrix = n.getMatrix();
         
-        keyL = matrix[lin - 1][col] + " " + matrix[lin][col]; //Bigram Line
-        keyC = matrix[lin][col - 1] + " " + matrix[lin][col]; //Bigram Column
+        keyL = matrix[lin][col - 1] + " " + matrix[lin][col]; //Bigram Line
+        keyC = matrix[lin - 1][col] + " " + matrix[lin][col]; //Bigram Column
         keyD = matrix[lin - 1][col - 1] + " " + matrix[lin][col]; //Bigram Diagonal
         
         if(col == 3) { //Test if it is the last line character.
-            String word = new String(matrix[lin]);
+            String word = new String(matrix[lin]).substring(1);
             lineValid = dictionary.contains(word);
             
             colValid = (heuristic.get(keyC) > 0.0f);
             
-            if(lin == 1) { //Test if it is the last diagonal character too.
+            if(lin == 3) { //Test if it is the last diagonal character too.
                 word = "";
                 for (int i = 1; i < matrix.length; i++) {                    
                         word += matrix[i][i];                                                                
@@ -252,7 +285,7 @@ public class Tree {
         
         else {
             if(lin == 3) { //Test if it is the last column character
-                String word = new String(matrix[col]);
+                String word = new String(matrix[col]).substring(1);
                 colValid = dictionary.contains(word);
 
                 lineValid = (heuristic.get(keyL) > 0.0f);
@@ -275,8 +308,57 @@ public class Tree {
             }
         }
         
-        return lineValid ^ colValid ^ diagonalValid;
+        //Print teste de validez do nó
+        System.out.println(" -Node: "+n.getName()+"\n  "+lineValid +"^"+ colValid +"^"+ diagonalValid+'\n');             
+        
+        boolean aux = (lineValid ^ colValid) ^ diagonalValid;
+        return aux;
     }
 
+    private char[][] updateMatrix(int index, Node n, int lin, int col) {
+        
+        char[][] matrix = new char[4][4];
+        for (int i = 0; i < matrix.length; i++) {
+            System.arraycopy(n.getDad().getMatrix()[i], 0, matrix[i], 0, matrix.length);
+        }
+        
+        matrix[lin][col] = n.getName();
+        if (index > 1)
+            if(index%3 == 1) 
+                matrix[lin - 1][3] = n.getDad().getName();
+            else
+                matrix[lin][col - 1] = n.getDad().getName();
+
+        n.setMatrix(matrix);
+        
+        //Print matriz do nó
+        System.out.println("Matrix: "+n.getName()+"\n"+n);
+        
+        return matrix;
+    }
+
+//    private Node updateNode(int index, Node n, Node dad, int lin, int col, double function) {
+//        n.setDad(dad);
+//        n.setCost(9.0f - index);
+//        n.setMatrix(updateMatrix(index, n, lin, col));                    
+//        n.setFunction(function);
+//        
+//        return n;
+//    }
+
+//    private boolean isChanged(List<Node> list, List<Node> anotherList) {
+//        
+//        if(list.size() == anotherList.size()) {
+//            for (int i = 0; i < anotherList.size(); i++) {                
+//                Node a = list.get(i), b = anotherList.get(i);
+//                if(a.getName() != b.getName() || a.getFunction() != a.getFunction() || a.getDad() != b.getDad()){
+//                    return true;
+//                }
+//            }
+//            return false;
+//        }
+//        else
+//            return true;
+//    }
     
 }
