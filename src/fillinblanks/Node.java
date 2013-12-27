@@ -9,12 +9,14 @@ package fillinblanks;
  * @author rai
  */
 public class Node {
+    private int index;
     private char name;
     private double cost, function;
     private char[][] matrix;
     private Node dad;
 
     public Node(char name) {
+        index = 0;
         cost = 9.0d; function = 0.0d;
         this.name = name;
         matrix = new char[4][4];
@@ -23,9 +25,24 @@ public class Node {
             matrix[i][0] = '$';
         }
         dad = null;
-    }   
-        
+    }
 
+    public void incIndex() {
+        index++;
+    }
+    
+    public void decIndex() {
+        index--;
+    }
+    
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
+    }            
+    
     public char getName() {
         return name;
     }
