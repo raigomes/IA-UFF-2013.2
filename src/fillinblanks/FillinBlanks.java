@@ -14,7 +14,8 @@ public class FillinBlanks {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        String s = "AEOPRRSWY"; 
+        //String s = "AEOPRRSWY"; 
+        String s = "AEEIKLLPY"; 
         char[] vector = s.toUpperCase().toCharArray();
         Tree t = new Tree();
         t.search(vector);

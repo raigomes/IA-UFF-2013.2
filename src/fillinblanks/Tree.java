@@ -5,7 +5,6 @@
 package fillinblanks;
 
 import java.io.File;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -82,25 +81,7 @@ public class Tree {
             //Se chegou no objetivo, imprime matriz completa.
             if(node.getCost() == 0) {
                 System.out.println("Matriz Completa:\n"+node+"\nStrings:"); 
-                
-                char[][] matrix = node.getMatrix();
-                String h, v, d1 = "", d2 = "";
-                
-                for (int i = 1; i < matrix.length; i++) {
-                    h = new String(matrix[i]).substring(1);
-                    System.out.println(h+" -> "+dictionary.contains(h));
-                }
-                for (int i = 1; i < matrix.length; i++) {
-                    v = matrix[1][i] + "" + matrix[2][i] + "" + matrix[3][i];
-                    System.out.println(v+" -> "+dictionary.contains(v));
-                }
-                for (int i = 1; i < matrix.length; i++) {
-                    d1 += matrix[i][i];
-                    d2 += matrix[i][4-i];
-                }
-                
-                System.out.println(d1+" -> "+dictionary.contains(d1));
-                System.out.println(d2+" -> "+dictionary.contains(d2));
+                printWords(node, dictionary);                
             }
             
             else {                
@@ -268,7 +249,7 @@ public class Tree {
         if (!list.isEmpty()) { //Add de maneira que a lista fique em ordem decrescente de function.
             while(i < list.size() && !inseriu) {
                 Node aux = list.get(i);                    
-                if(aux.getFunction() < n.getFunction()) {
+                if(aux.getFunction() > n.getFunction()) {
                     list.add(i, n);
                     inseriu = true;
                 }
@@ -322,7 +303,7 @@ public class Tree {
                 }
                 else {
                     lineValid = (heuristic.get(keyL) > 0.0f);
-                    diagonalValid = (heuristic.get(keyD) > 0.0f);
+                    diagonalValid = true;
                 }
         }
         
@@ -332,12 +313,12 @@ public class Tree {
                 
                 lineValid = dictionary.contains(word);
                 colValid = (heuristic.get(keyC) > 0.0f);
-                diagonalValid = (heuristic.get(keyD) > 0.0f);
+                diagonalValid = true;
             }        
             else { //Case of there aren't search in dictionary.
                 lineValid = (heuristic.get(keyL) > 0.0f);
                 colValid = (heuristic.get(keyC) > 0.0f);
-                diagonalValid = (heuristic.get(keyD) > 0.0f);
+                diagonalValid = true;
             }
         }
         
@@ -419,6 +400,27 @@ public class Tree {
         }
         
         return false;
+    }
+
+    private void printWords(Node node, SortedSet<String> dictionary) {
+        char[][] matrix = node.getMatrix();
+        String h, v, d1 = "", d2 = "";
+
+        for (int i = 1; i < matrix.length; i++) {
+            h = new String(matrix[i]).substring(1);
+            System.out.println(h+" -> "+dictionary.contains(h));
+        }
+        for (int i = 1; i < matrix.length; i++) {
+            v = matrix[1][i] + "" + matrix[2][i] + "" + matrix[3][i];
+            System.out.println(v+" -> "+dictionary.contains(v));
+        }
+        for (int i = 1; i < matrix.length; i++) {
+            d1 += matrix[i][i];
+            d2 += matrix[i][4-i];
+        }
+
+        System.out.println(d1+" -> "+dictionary.contains(d1));
+        System.out.println(d2+" -> "+dictionary.contains(d2));
     }
             
 }
