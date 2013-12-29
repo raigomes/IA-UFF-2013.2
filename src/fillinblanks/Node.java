@@ -4,19 +4,23 @@
  */
 package fillinblanks;
 
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  *
  * @author rai
  */
-public class Node {
-    private int index;
-    private char name;
+public class Node implements Comparable<Node> {
+    private int position;
+    private Character name;
     private double cost, function;
     private char[][] matrix;
     private Node dad;
+    private List<Character> child;
 
     public Node(char name) {
-        index = 0;
+        position = 0;
         cost = 9.0d; function = 0.0d;
         this.name = name;
         matrix = new char[4][4];
@@ -25,25 +29,26 @@ public class Node {
             matrix[i][0] = '$';
         }
         dad = null;
+        child = new LinkedList<Character>();
     }
 
-    public void incIndex() {
-        index++;
+    public void incPosition() {
+        position++;
     }
     
-    public void decIndex() {
-        index--;
+    public void decPosition() {
+        position--;
     }
     
-    public int getIndex() {
-        return index;
+    public int getPosition() {
+        return position;
     }
 
-    public void setIndex(int index) {
-        this.index = index;
+    public void setPosition(int newPosition) {
+        this.position = newPosition;
     }            
     
-    public char getName() {
+    public Character getName() {
         return name;
     }
 
@@ -75,15 +80,16 @@ public class Node {
     public void setDad(Node dad) {
         this.dad = dad;
     }
-    
 
-//    public Node getSon() {
-//        return son;
-//    }
-//
-//    public void setSon(Node son) {
-//        this.son = son;
-//    }
+    public List<Character> getChild() {
+        return child;
+    }
+
+    public void setChild(List<Character> child) {
+        for(char c: child) {
+            this.child.add(c);
+        }
+    }    
     
     
     public char[][] getMatrix() {
@@ -91,7 +97,9 @@ public class Node {
     }
 
     public void setMatrix(char[][] matrix) {
-        this.matrix = matrix;
+        for (int i = 0; i < matrix.length; i++) {
+            System.arraycopy(matrix[i], 0, this.getMatrix()[i], 0, matrix.length);
+        }
     }
 
     @Override
@@ -106,6 +114,19 @@ public class Node {
         }
         
         return answer.toString();
+    }
+
+    @Override
+    public int compareTo(Node n) {
+        if(this.name == n.name) {
+            if(this.dad == n.dad)
+                return 0;
+            else
+                return 1;
+        }
+        else {
+            return -1;
+        }
     }
     
     
