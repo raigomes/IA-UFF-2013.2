@@ -112,8 +112,8 @@ public class UserInterface {
                     break;
                 case 3:
                     cmd = new Command("Simulated", Command.SEARCH, input, path);
-                    cmd.execute();
                     cmd.print();
+                    cmd.execute();
                     break;  
 //                case 9:
 //                    chooseEntryType(scn);
@@ -198,7 +198,7 @@ public class UserInterface {
     }
 
     public static void update(String input) {
-        System.out.println(input);
+        System.out.println("\n"+input);
     }
 
     private static void exit() {
