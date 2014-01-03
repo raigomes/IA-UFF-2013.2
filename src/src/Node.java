@@ -21,7 +21,7 @@ public class Node implements Comparable<Node> {
 
     public Node(char name) {
         position = 0;
-        cost = 9.0d; function = 0.0d;
+        cost = 0.0d; function = 0.0d;
         this.name = name;
         matrix = new char[4][4];
         for (int i = 0; i < matrix.length; i++) {
@@ -30,7 +30,7 @@ public class Node implements Comparable<Node> {
         }
         dad = null;
         child = new LinkedList<Character>();
-    }
+    }        
 
     public void incPosition() {
         position++;
@@ -54,8 +54,7 @@ public class Node implements Comparable<Node> {
 
     public void setValue(char value) {
         this.name = value;
-    }
-    
+    }    
 
     public double getCost() {
         return cost;
@@ -90,8 +89,7 @@ public class Node implements Comparable<Node> {
             this.child.add(c);
         }
     }    
-    
-    
+      
     public char[][] getMatrix() {
         return matrix;
     }
@@ -127,9 +125,5 @@ public class Node implements Comparable<Node> {
         else {
             return -1;
         }
-    }
-    
-    
-    
-    
+    }                
 }
