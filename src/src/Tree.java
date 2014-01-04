@@ -67,6 +67,7 @@ public class Tree extends Observable{
         }                                
         t = System.currentTimeMillis();
         
+        System.out.println("Tempo decorrido: "+(t-t0)+"\n");
         updateLog("Tempo decorrido: "+(t-t0)+"\n");
         updateLog("END");
     }
