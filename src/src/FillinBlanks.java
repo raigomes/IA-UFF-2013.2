@@ -19,6 +19,7 @@ public class FillinBlanks {
      */
     public static void main(String[] args) {        
         UserInterface.show();        
+        
 //        String s = "WESOPRYAR"; 
 //        String s = "AEEIKLLPY";                  
 //        

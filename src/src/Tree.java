@@ -6,6 +6,7 @@ package src;
 
 import controller.*;
 import java.io.File;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.Observable;
 import java.util.Scanner;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import javax.management.timer.Timer;
 
 /**
  *
@@ -45,11 +47,13 @@ public class Tree extends Observable{
     
     public void search(char[] input, int type) {
         List<Character> in = new LinkedList<Character>();                
+        long t0, t;
         
         for(char name: input) {
             in.add(name);
         }
         
+        t0 = System.currentTimeMillis();
         switch(type) {
             case 0: 
                 AStar(in);
@@ -61,6 +65,10 @@ public class Tree extends Observable{
                 SimulatedAnnealing(in);
                 break;
         }                                
+        t = System.currentTimeMillis();
+        
+        updateLog("Tempo decorrido: "+(t-t0)+"\n");
+        updateLog("END");
     }
         
     private void AStar(List<Character> input) {        
@@ -77,9 +85,7 @@ public class Tree extends Observable{
                 
         Node answer = AStar(frontier, explored, input, heuristic, dictionary);
         if(answer != null)
-            printWords(answer.getMatrix(), dictionary);
-        
-        updateLog("END");
+            printWords(answer.getMatrix(), dictionary);        
     }        
 
     private Node AStar(List<Node> frontier, List<Node> explored, List<Character> input, Map<String, Double> heuristic, SortedSet<String> dictionary) {        
@@ -144,7 +150,8 @@ public class Tree extends Observable{
     private void HillClimbing(List<Character> input) {
         List<Node> explored = new LinkedList<Node>();
         Map<String, Double> heuristic = getHeuristicFromFile();
-        SortedSet<String> dictionary = getDictionaryFromFile();
+        SortedSet<String> dictionary = getDictionaryFromFile();                
+        
         
         updateLog("Hill Climbing Algorithm:\n\n");
         Node bestNode = null;
@@ -176,8 +183,7 @@ public class Tree extends Observable{
             }                
         }
         
-        System.out.println("FALHA\nMelhor Resposta:\n"+ bestNode);
-        updateLog("END");
+        System.out.println("FALHA\nMelhor Resposta:\n"+ bestNode);        
     }
     
     private Node HillClimbing(Node current, List<Character> input, List<Node> explored, Map<String, Double> heuristic, SortedSet<String> dictionary) {
@@ -221,14 +227,12 @@ public class Tree extends Observable{
         firstNode.setChild(input);
         explored.add(firstNode);
         
-        System.out.println("Add "+firstNode.getName()+" in Explored");                     
-        System.out.println("F(n) = "+firstNode.getFunction()+"\n");
+        updateLog("Add "+firstNode.getName()+" in Explored" 
+                + "F(n) = "+firstNode.getFunction()+"\n");
         
         Node answer = SimulatedAnnealing(firstNode, input, explored, heuristic, dictionary);
         if(answer != null)
-            printWords(answer.getMatrix(), dictionary);
-        
-        updateLog("END");
+            printWords(answer.getMatrix(), dictionary);        
     }   
     
     private Node SimulatedAnnealing(Node current, List<Character> input, List<Node> explored, Map<String, Double> heuristic, SortedSet<String> dictionary) {          
